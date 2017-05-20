@@ -1,7 +1,6 @@
 module Tokenizer where
 
 import Text.Parsec
-import Text.Parsec.String
 import HTML
 import qualified Text.Parsec.Token as P
 import Text.Parsec.Language (emptyDef)
@@ -13,9 +12,11 @@ data HtmlToken
   | Text String
 
 instance Show HtmlToken where
-  show (StartTag s)= "<Start "++s++">"
-  show (EndTag s)= "<End "++s++">"
-  show (Text s)= "<Data "++s++">"
+  show (StartTag s) = "<Start:"++s++">"
+  show (EndTag s) = "<End:"++s++">"
+  show (Text s) = "<Data:"++s++">"
+
+type Parser = Parsec String ()
 
 lexer = P.makeTokenParser emptyDef
 
@@ -24,37 +25,48 @@ identifier = P.identifier lexer
 symbol = P.symbol lexer
 
 
-text :: Parsec String () HtmlToken
+text :: Parser HtmlToken
 text = do
-  text <- many1 (noneOf "<")
+  text <- many1 (noneOf "<>")
   return(Text text)
 
+startTagOptional :: Parser ()
+startTagOptional = do
+  text <- many1 (noneOf ">")
+  return ()
 
-startTag :: Parsec String () HtmlToken
+
+startTag :: Parser HtmlToken
 startTag = do
-  char '<'
-  name <- tagIdentifier
-  char '>'
-  return(StartTag name)
+  char '<';
+  name <- tagIdentifier;
+  optional startTagOptional;
+  char '>';
+  return(StartTag name);
 
-endTag :: Parsec String () HtmlToken
+endTag :: Parser HtmlToken
 endTag = do
-  string "</"
-  name <- tagIdentifier
-  char '>'
-  return(EndTag name)
+  string "</";
+  name <- tagIdentifier;
+  char '>';
+  return(EndTag name);
 
-tagIdentifier :: Parsec String () String
+tagIdentifier :: Parser String
 tagIdentifier = do
-  id <- many1 letter
-  return(id)
+  id <- many1 letter;
+  return(id);
 
-htmlFile :: Parsec String () [HtmlToken]
-htmlFile = do
-  tags <- many (try startTag <|> try endTag <|> try text)
-  return(tags)
+
+htmlTokenP :: Parser HtmlToken
+htmlTokenP = (try startTag <|> try endTag <|> try text)
+
+htmlFileP :: Parser [HtmlToken]
+htmlFileP = do
+  tokens <- many htmlTokenP;
+  eof;
+  return(tokens)
 
 tokenizeHtml :: String -> Either ParseError [HtmlToken]
-tokenizeHtml htmlContent = parse htmlFile "stdin" htmlContent
+tokenizeHtml htmlContent = parse htmlFileP "stdin" htmlContent
 
 testTag htmlContent = parse tagIdentifier "stdin" htmlContent
