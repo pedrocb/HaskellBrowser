@@ -1,8 +1,6 @@
 module Main where
 
-import Parser
+import Cli
 
 main :: IO ()
-main = do
-  contents <- getContents
-  putStr contents
+main = runCli
