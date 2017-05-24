@@ -102,3 +102,20 @@ Tag: html
 ....Tag: ul
 ......Tag: li
 ```
+
+# External packages used
+- http://hackage.haskell.org/package/cli
+- http://hackage.haskell.org/package/parsec
+- http://hackage.haskell.org/package/HTTP
+
+# Supported tags
+```
+- <p></p>
+- <ol></ol>
+- <ul></ul>
+- <li></li>
+- <h1-6></h1-6>
+- <b></b>
+- <html>
+- <a>hyperlink</a>
+```
