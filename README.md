@@ -1,3 +1,5 @@
+Textual HTML Viewer/Browser. Project for Advanced Topics of Functional Programming subject
+
 # Html Browser
 
 ## Building
